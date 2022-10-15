@@ -140,12 +140,11 @@ int main(int argc, char **argv){
     {
         filename = argv[3];
     }
-    else if (!strcmp(command.c_str(), "shit"))
+    else if (!strcmp(command.c_str(), "export"))
     {
         start_block = argv[3];
         filename = argv[4];
     }
-    
     
     // Create an empty disk
     Disk base;
@@ -171,7 +170,7 @@ int main(int argc, char **argv){
     jdisk_read(mydisk, 0, buf);
 
     // Supposed to print out FAT links
-    for(int i = 1; i < num_sectors + 1; ++i)
+    for(int i = 0; i < data_sectors + 1; ++i)
     {
         printf("%d\n", fat_links[i]);
     }
