@@ -21,7 +21,7 @@ typedef struct {
   int writes;
 } Disk;
 
-int import(string diskname, string filename, int fat_links[])
+int import(string diskname, string filename, int fat_links[], int fat_sectors)
 {
     // Read the file into a string, digure out its size
     std::ifstream t(filename);
@@ -40,7 +40,6 @@ int import(string diskname, string filename, int fat_links[])
     // Walking through the fat sectors array and checking if there is enough space to fit the file;
     int iter = 0;
     int j = 0;
-
     int val = -1;
 
     while(val != 0)
@@ -57,12 +56,17 @@ int import(string diskname, string filename, int fat_links[])
     }
 
     // If we are here, the file can be fit. 
+    // 2nd pass through the list using writes
     iter = 0;
+    j = 0;
+    // This will be used as a 1024 buffer 
     while(val != 0)
     {
         val = fat_links[iter];
-        // Write
-        //jdisk_write(void *jd, unsigned int lba, void *buf);
+        string buffer = file_data.substr(j, j + 1024 - 1);
+        void * buf = &buffer;
+        // Write into sector fat_sectors + val - 1
+        //jdisk_write(diskname, fat_sectors + val - 1, buf);
     }
 
     return 1;
@@ -159,20 +163,19 @@ int main(int argc, char **argv){
     long fat_sectors = num_sectors - data_sectors;
 
     // Need to read this from the disk
-    unsigned short fat_links[512];
+    unsigned short fat_links[512] = {};
     
     //FAT takes up (data_sectors + 1) * 2 bytes, hence it is
     //(data_sectors + 1) / 4 chars from the disk. Each entry in the fat_links is then
     //2 bytes. 
     
     // Here, use read
-    void* buf = &fat_links;
-    jdisk_read(mydisk, 0, buf);
+    jdisk_read(mydisk, 0, fat_links);
 
     // Supposed to print out FAT links
     for(int i = 0; i < data_sectors + 1; ++i)
     {
-        printf("%d\n", fat_links[i]);
+        printf("%u\n", fat_links[i]);
     }
 
     return 0;
