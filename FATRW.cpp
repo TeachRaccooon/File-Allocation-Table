@@ -40,7 +40,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
         return 2;
     }
     
-    printf("FILE SIZE %ld %d\n", file_size, buf_size);
+    //printf("FILE SIZE %ld %d\n", file_size, buf_size);
     // Storing a file as a char array
     char file_buffer[buf_size];
     FILE* fp = std::fopen(filename, "r");
@@ -68,9 +68,9 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
         file_buffer[buf_size - 2] = (non_full_sector & 0x00ff);
 
         //printf("BYTES OCCUPIED %d\n", non_full_sector);
-        printf("LAST BYTE %d\n", (non_full_sector & 0xff00) >> 8);
+        //printf("LAST BYTE %d\n", (non_full_sector & 0xff00) >> 8);
 
-        printf("PRE-LAST BYTE %d\n", (non_full_sector & 0x00ff));
+        //printf("PRE-LAST BYTE %d\n", (non_full_sector & 0x00ff));
     }
     
 
@@ -95,7 +95,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     if(j != file_sectors)
     {
         // Nothing is changed, print the error message
-        printf("Not enough free sectors (%d) for %s, which needs %d.\n", j, filename, file_sectors);
+        fprintf(stderr, "Not enough free sectors (%d) for %s, which needs %d.\n", j, filename, file_sectors);
         return 1;
     }
 
@@ -138,7 +138,7 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
 
     if(curr_link == 0)
     {
-        printf("Error in Export: LBA is not for a data sector.\n");
+        fprintf(stderr, "Error in Export: LBA is not for a data sector.\n");
         return 1;
     }
 
@@ -158,7 +158,7 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
 
         if(curr_link == prev_link)
         {
-            printf("LAST BYTES %d %d\n", buf[1022], buf[1023]);
+            //printf("LAST BYTES %d %d\n", buf[1022], buf[1023]);
 
             // If the last byte of the sector is 255
             
