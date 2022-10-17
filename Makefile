@@ -12,7 +12,7 @@ CC = gcc
 .SUFFIXES: .cpp .c .o .out .hist .jgr .jps .eps .nt .bib .tab .tex .dvi .fig .txt .ps .pdf .bin .od .odh .odd .ppm .gif
 
 .cpp.o: 
-	g++ -c -I$(INCLUDE) $*.cpp
+	g++ -c -Wall -pedantic -I$(INCLUDE) $*.cpp
 
 .c.o: 
 	g++ -c -I$(INCLUDE) $*.c
