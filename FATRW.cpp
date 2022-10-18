@@ -166,7 +166,7 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
     jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
 
     int prev_link;
-    char buf[1024];
+    unsigned char buf[1024];
     int bytes_occupied = 1024;
     std::ofstream stream;
     FILE* fp = std::fopen(filename, "w");
@@ -191,25 +191,19 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
         // Not occupying the full sector
         if(curr_link == fat_links[curr_link])
         {
-            //printf("LAST BYTES %d %d\n", buf[1022], buf[1023]);
+            printf("LAST BYTES %u %u\n", buf[1022], buf[1023]);
 
             // If the last byte of the sector is 255
             
-            if(buf[1023] == -1)
+            if(buf[1023] == 0xff)
             {
+                printf("HI\n");
                 bytes_occupied = 1023;
             }
             else // check the last two bytes;
             {
                 // Contcatenate the two and turn them into a number?
-                if(buf[1023] == 0)
-                {
-                    bytes_occupied = buf[1022];
-                }
-                else
-                {
-                    bytes_occupied = std::pow(2, buf[1023]) + buf[1022];
-                }
+                bytes_occupied = buf[1022] | (buf[1023] << 8);
             } 
         }
         // Write "bytes_occupied" into the file
