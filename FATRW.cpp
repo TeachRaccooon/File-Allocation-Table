@@ -163,7 +163,7 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
     int curr_link = start_block - fat_sectors + 1;
 
     // Initially read the sector associated with the link
-    jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
+    //jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
 
     int prev_link;
     unsigned char buf[1024];
