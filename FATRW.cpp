@@ -198,7 +198,14 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
             else // check the last two bytes;
             {
                 // Contcatenate the two and turn them into a number?
-                bytes_occupied = std::pow(2, buf[1023]) + buf[1022];
+                if(buf[1023] == 0)
+                {
+                    bytes_occupied = buf[1022];
+                }
+                else
+                {
+                    bytes_occupied = std::pow(2, buf[1023]) + buf[1022];
+                }
             } 
         }
         // Write "bytes_occupied" into the file
