@@ -118,7 +118,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     // 2nd pass through the list using writes
     iter = 0;
     j = 0;
-    printf("New file starts at sector %d\n", fat_links[0]);
+    printf("New file starts at sector %d\n", fat_links[0] + fat_sectors - 1);
 
     while(j != file_sectors)
     {
