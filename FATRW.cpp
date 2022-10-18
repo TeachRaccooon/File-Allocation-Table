@@ -24,6 +24,9 @@ typedef struct {
 
 int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sectors)
 {
+    // Only read the irst sector initially
+    jdisk_read(mydisk, 0, fat_links);
+
     long disk_size = jdisk_size(mydisk);
 
     // Getting a file size
@@ -151,13 +154,16 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
 
 int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sectors, int start_block)
 {
-    int curr_link = start_block - fat_sectors + 1;
 
-    if(curr_link == 0)
+    if(start_block <= fat_sectors)
     {
         fprintf(stderr, "Error in Export: LBA is not for a data sector.\n");
         return 1;
     }
+    int curr_link = start_block - fat_sectors + 1;
+
+    // Initially read the sector associated with the link
+    jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
 
     int prev_link;
     char buf[1024];
@@ -172,20 +178,18 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
 
     while(curr_link != 0 && curr_link != prev_link)
     {   
-        prev_link = curr_link;
-        curr_link = fat_links[curr_link];
-
         // Chek if sector has been initialized
         if (!initialized_sectors[curr_link / 512])
         {
             jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
             initialized_sectors[curr_link / 512] = 1;
         }
-
+        
         // Read sector curr_link + S - 1 and put that in a file
-        jdisk_read(mydisk, curr_link - fat_sectors + 1, buf);
+        jdisk_read(mydisk, curr_link + fat_sectors - 1, buf);
 
-        if(curr_link == prev_link)
+        // Not occupying the full sector
+        if(curr_link == fat_links[curr_link])
         {
             //printf("LAST BYTES %d %d\n", buf[1022], buf[1023]);
 
@@ -211,6 +215,10 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
         // Write "bytes_occupied" into the file
         for(int i = 0; i < bytes_occupied; ++i)
         std::fputc(buf[i], fp);
+
+        // Advance
+        prev_link = curr_link;
+        curr_link = fat_links[curr_link];
     }
 
     return 0;
@@ -240,9 +248,6 @@ int main(int argc, char **argv){
     //FAT takes up (data_sectors + 1) * 2 bytes, hence it is
     //(data_sectors + 1) / 4 chars from the disk. Each entry in the fat_links is then
     //2 bytes. 
-
-    // Only read the irst sector initially
-    jdisk_read(mydisk, 0, fat_links);
 
     //  xxd -s 0 -l 20 -g 2 -e t1.jdisk 
     // Supposed to print out FAT links
