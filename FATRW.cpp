@@ -155,7 +155,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
 int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sectors, int start_block)
 {
 
-    if(start_block <= fat_sectors)
+    if(start_block == 0)
     {
         fprintf(stderr, "Error in Export: LBA is not for a data sector.\n");
         return 1;
