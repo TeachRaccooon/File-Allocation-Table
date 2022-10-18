@@ -191,13 +191,13 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
         // Not occupying the full sector
         if(curr_link == fat_links[curr_link])
         {
-            printf("LAST BYTES %u %u\n", buf[1022], buf[1023]);
+            //printf("LAST BYTES %u %u\n", buf[1022], buf[1023]);
 
             // If the last byte of the sector is 255
             
             if(buf[1023] == 0xff)
             {
-                printf("HI\n");
+                //printf("HI\n");
                 bytes_occupied = 1023;
             }
             else // check the last two bytes;
