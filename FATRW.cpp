@@ -61,12 +61,12 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     if(non_full_sector == 1023)
     {
         // Indicate we're only missing 1 byte
-        file_buffer[buf_size - 1] = -1;
+        file_buffer[buf_size - 1] =  0xff;
     }
     else if(non_full_sector)
     {
         // Indicate how many bytes we're using
-        file_buffer[buf_size - 1] = ((non_full_sector & 0xff00) << 8);
+        file_buffer[buf_size - 1] = ((non_full_sector & 0xff00) >> 8);
         file_buffer[buf_size - 2] = (non_full_sector & 0x00ff);
 
         //printf("BYTES OCCUPIED %d\n", non_full_sector);
