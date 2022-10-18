@@ -124,7 +124,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     {
         iter = fat_links[iter];
         // Write into sector fat_sectors + iter - 1
-        jdisk_write(mydisk, fat_sectors + iter - 1, &file_buffer[0] + j * 512);
+        jdisk_write(mydisk, fat_sectors + iter - 1, &file_buffer[0] + j * 1024);
         ++j;
     }
 
