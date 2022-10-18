@@ -66,7 +66,7 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     else if(non_full_sector)
     {
         // Indicate how many bytes we're using
-        file_buffer[buf_size - 1] = ((non_full_sector & 0xff00) >> 8);
+        file_buffer[buf_size - 1] = ((non_full_sector & 0xff00) << 8);
         file_buffer[buf_size - 2] = (non_full_sector & 0x00ff);
 
         //printf("BYTES OCCUPIED %d\n", non_full_sector);
@@ -170,7 +170,6 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
     int bytes_occupied = 1024;
     std::ofstream stream;
     FILE* fp = std::fopen(filename, "w");
-
 
     // Keep track of what's been initialized
     int initialized_sectors[fat_sectors] = {};
