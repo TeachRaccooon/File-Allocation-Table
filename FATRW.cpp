@@ -47,13 +47,12 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     char c;
     int i = 0;
     // standard C I/O file reading loop
-    
-    while ((c = std::fgetc(fp)) != EOF) 
-    { 
-       file_buffer[i] = c;
-       ++i;
-    }
 
+    while ((c = std::fgetc(fp)) != EOF) 
+    {
+        file_buffer[i] = c;
+        ++i;
+    }
     
     // Place info about non full sector
     if(non_full_sector == 1023)
@@ -73,24 +72,37 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
         //printf("PRE-LAST BYTE %d\n", (non_full_sector & 0x00ff));
     }
     
-
     int file_sectors = ceil((float) file_size / (float) 1024);
 
     // Walking through the fat sectors array and checking if there is enough space to fit the file.
-    short iter = 0;
+    unsigned short iter = 0;
     int j = 0;
+
+    // Keep track of what's been initialized
+    int initialized_sectors[fat_sectors] = {};
+    initialized_sectors[0] = 1;
 
     // Stop when the list ends or when we can fit the file.
     while(j != file_sectors)
     {
+
         iter = fat_links[iter];
+        //printf("ITER: %d\n", iter);
+
+        // Chek if sector has been initialized
+        if (!initialized_sectors[iter / 512])
+        {
+            jdisk_read(mydisk, iter / 512, &fat_links[0] + 512 * (iter / 512));
+            initialized_sectors[iter / 512] = 1;
+        }
+
         if(iter == 0)
         {
             break;
         }
         ++j;
     }
-
+    
     // List is over, no space for the file
     if(j != file_sectors)
     {
@@ -128,6 +140,11 @@ int import(void* mydisk, char* filename, unsigned short fat_links[], int fat_sec
     
     // Update fat links on a disk
     jdisk_write(mydisk, 0, fat_links);
+
+    if(iter / 512 != 0)
+    {
+        jdisk_write(mydisk, iter / 512, &fat_links[0] + 512 * (iter / 512));
+    }
     
     return 0;
 }
@@ -148,10 +165,22 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
     std::ofstream stream;
     FILE* fp = std::fopen(filename, "w");
 
+
+    // Keep track of what's been initialized
+    int initialized_sectors[fat_sectors] = {};
+    initialized_sectors[0] = 1;
+
     while(curr_link != 0 && curr_link != prev_link)
     {   
         prev_link = curr_link;
         curr_link = fat_links[curr_link];
+
+        // Chek if sector has been initialized
+        if (!initialized_sectors[curr_link / 512])
+        {
+            jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
+            initialized_sectors[curr_link / 512] = 1;
+        }
 
         // Read sector curr_link + S - 1 and put that in a file
         jdisk_read(mydisk, curr_link - fat_sectors + 1, buf);
@@ -199,22 +228,29 @@ int main(int argc, char **argv){
     long fat_sectors = num_sectors - data_sectors;
 
     // Need to read this from the disk
-    unsigned short fat_links[fat_sectors * 512] = {};
+    unsigned short fat_links[512 * fat_sectors] = {};
     
     //FAT takes up (data_sectors + 1) * 2 bytes, hence it is
     //(data_sectors + 1) / 4 chars from the disk. Each entry in the fat_links is then
     //2 bytes. 
 
-    // Here, use read
+    // Only read the irst sector initially
     jdisk_read(mydisk, 0, fat_links);
 
     //  xxd -s 0 -l 20 -g 2 -e t1.jdisk 
     // Supposed to print out FAT links
+    
     /*
-    for(int i = 0; i < data_sectors + 1; ++i)
+    for(int i = 0; i < 7000; ++i)
     {
-        printf("%u\n", fat_links[i]);
+        if (fat_links[i] < 0)
+        {
+            printf("%d: %u\n", i, fat_links[i]);
+        }
     }
+
+    printf("%u\n", fat_links[6711]);
+    printf("%u\n", fat_links[49697]);
     */
 
     if (!strcmp(argv[2], "import"))
