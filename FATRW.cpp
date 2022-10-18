@@ -181,11 +181,13 @@ int exprt(void* mydisk, char* filename, unsigned short fat_links[], int fat_sect
         if (!initialized_sectors[curr_link / 512])
         {
             jdisk_read(mydisk, curr_link / 512, &fat_links[0] + 512 * (curr_link / 512));
+            //printf("READING SECTOR %d\n", curr_link / 512);
             initialized_sectors[curr_link / 512] = 1;
         }
         
         // Read sector curr_link + S - 1 and put that in a file
         jdisk_read(mydisk, curr_link + fat_sectors - 1, buf);
+        //printf("READING BLOCK %d\n", curr_link + fat_sectors - 1);
 
         // Not occupying the full sector
         if(curr_link == fat_links[curr_link])
